@@ -4,13 +4,16 @@ import { useGLTF } from "@react-three/drei";
 import { Mesh, Vector3, Group } from "three";
 import { getModelByTitle } from "../data/ModelList";
 import { toonMaterials } from "./Materials";
+import gsap from "gsap";
 
 interface RoadProps {
   extendNum?: number;
-  speed?: number;
 }
 
-export function Road({ extendNum = 1, speed = 0.5 }: RoadProps) {
+const zLength = 212.4027;
+const offset = new Vector3(0, 34, 0);
+
+export function Road({ extendNum = 1 }: RoadProps) {
   const group = useRef<Group>(null);
   const { gl, camera } = useThree(); // 获取 renderer 和 camera
   const { scene } = useGLTF(getModelByTitle("Road") || "");
@@ -19,9 +22,11 @@ export function Road({ extendNum = 1, speed = 0.5 }: RoadProps) {
   // Only run traverse once
   useEffect(() => {
     scene.traverse((mesh: any) => {
+      mesh.receiveShadow = true
       if (mesh instanceof Mesh) {
         mesh.material = toonMaterials.getToonMaterial_Road(mesh.material, gl)
-        // mesh.receiveShadow = true
+        mesh.receiveShadow = true
+        
       }
     })
   }, [scene, gl]);
@@ -34,9 +39,6 @@ export function Road({ extendNum = 1, speed = 0.5 }: RoadProps) {
     });
     return base.children;
   }, [scene]);
-
-  const zLength = 212.4027;
-  const offset = useMemo(() => new Vector3(0, 34, 200), []);
 
   // Store refs to all road meshes and their positions
   const roadRefs = useRef<Array<Mesh | null>>([]);
@@ -59,8 +61,6 @@ export function Road({ extendNum = 1, speed = 0.5 }: RoadProps) {
           <primitive
             object={child}
             key={`road-${i}-${j}`}
-            castShadow
-            receiveShadow
             ref={(ref: Mesh | null) => {
               roadRefs.current[i * n + j] = ref;
             }}
@@ -69,30 +69,39 @@ export function Road({ extendNum = 1, speed = 0.5 }: RoadProps) {
       }
     }
     return roads;
-  }, [roadUnits, extendNum, zLength]);
+  }, []);
 
   // Animate the road moving towards the camera
-  useFrame((state, delta) => {
+  useFrame(() => {
     if (shouldStop) return;
     const cameraZ = camera.position.z;
     for (let i = 0; i < roadRefs.current.length; i++) {
       const mesh = roadRefs.current[i];
       if (!mesh) continue;
-      // Move forward
-      mesh.position.z += speed;
       // If passed camera, wrap to back
       if (mesh.position.z > cameraZ) {
         mesh.position.z -= (zLength * (extendNum + 1));
+        // Animate Y position: drop down, then bounce back up
+        const originalY = originPositions.current[i].y;
+        mesh.position.y = originalY - 70; // Start below
+        gsap.to(mesh.position, {
+          y: originalY,
+          duration: 0.5,
+          ease: "back.out(1.7)",
+        });
       }
-        // Optionally, you can also reset Y if you want a bounce effect
-        mesh.position.y -= 70;
-        mesh.position.y = originPositions.current[i].y; // or use a tween for smooth effect
     }
   });
 
   return (
+    <>
+    {/* <mesh position={[0, 0, -100]} castShadow receiveShadow>
+       <sphereGeometry args={[20, 32, 32]} />
+       <meshStandardMaterial color="blue" />
+     </mesh> */}
     <group ref={group} position={[-offset.x, -offset.y, -offset.z]}>
       {allRoads}
     </group>
+    </>
   );
 }

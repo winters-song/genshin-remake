@@ -113,6 +113,7 @@ const Columns = () => {
           });
         }
         if (mesh && mesh.geometry && mesh.material) {
+          mesh.castShadow = true;
           console.log(mesh.material);
           return (
             <instancedMesh

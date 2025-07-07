@@ -77,6 +77,7 @@ IncidentLight directLight;
 #endif
 #if ( NUM_DIR_LIGHTS > 0 ) && defined( RE_Direct )
     DirectionalLight directionalLight;
+
     #if defined( USE_SHADOWMAP ) && NUM_DIR_LIGHT_SHADOWS > 0
     DirectionalLightShadow directionalLightShadow;
     #endif
@@ -87,7 +88,7 @@ IncidentLight directLight;
         #if defined( USE_SHADOWMAP ) && ( UNROLLED_LOOP_INDEX < NUM_DIR_LIGHT_SHADOWS )
         directionalLightShadow = directionalLightShadows[ i ];
         directLight.color *= ( directLight.visible && receiveShadow ) ? getShadow( directionalShadowMap[ i ], directionalLightShadow.shadowMapSize, directionalLightShadow.shadowBias, directionalLightShadow.shadowRadius, vDirectionalShadowCoord[ i ] ) : 1.0;
-        #endif
+		#endif
         RE_Direct_ToonPhysical( directLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, metalnessFactor, reflectedLight );
     }
     #pragma unroll_loop_end

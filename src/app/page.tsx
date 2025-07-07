@@ -2,29 +2,29 @@
 
 import { Canvas } from '@react-three/fiber'
 import { useRef, useEffect, useState, Suspense } from 'react'
-import { Stats, useGLTF } from "@react-three/drei"
+import { OrbitControls, Stats, useGLTF } from "@react-three/drei"
 import { Preloader } from '@/components/Preloader/Preloader'
 import { Menu } from '@/components/Menu/Menu'
 import { Models } from '@/components/data/ModelList'
 import * as THREE from 'three'
 import React from 'react'
 import Scene from '@/components/GameScene'
-import ForwardCamera, { ForwardCameraHandle } from '@/components/models/ForwardCamera'
+import ForwardCamera from '@/components/models/ForwardCamera'
 
 
 export default function Home() {
   const [userReady, setUserReady] = useState(false)
   const [audioStarted, setAudioStarted] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
-  const forwardCameraRef = useRef<ForwardCameraHandle>(null)
+  const forwardCameraRef = useRef<any>(null)
 
   // Function to handle canvas click and play audio
   const handleCanvasClick = () => {
     if (!audioStarted) {
-      // setAudioStarted(true)
-      // if (audioRef.current) {
-      //   audioRef.current.play()
-      // }
+      setAudioStarted(true)
+      if (audioRef.current) {
+        audioRef.current.play()
+      }
     }
   }
 
@@ -50,28 +50,33 @@ export default function Home() {
       <Canvas
         style={{ width: '100vw', height: '100vh' }}
         camera={{
-          position: [0, 0, 0],
+          position: [0, 0, 5],
           fov: 45,
-          near: 0.1,
+          near: 1,
           far: 100000,
         }}
-        // frameloop="demand"
         gl={{ antialias: true }}
         onClick={handleCanvasClick}
         // onCreated={({ camera }) => {
         //   camera.rotation.set(5.5 * Math.PI / 180, 0, 0)
         // }}
+        // frameloop="demand"
+        // shadows={{
+        //   enabled: true,
+        //   type: THREE.PCFSoftShadowMap,
+        // }}
       >
         <Stats />
+
         <ForwardCamera ref={forwardCameraRef} />
         <Suspense fallback={null}>
-          <Scene />
+          <Scene forwardCameraRef={forwardCameraRef} />
         </Suspense>
       </Canvas>
     </>
   )
 }
 
-useGLTF.preload(Models.map((model) => model.url));
+// useGLTF.preload(Models.map((model) => model.url));
 
 

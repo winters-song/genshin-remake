@@ -64,9 +64,11 @@ export class ToonMaterials {
           ${patch}
           ${RE_Direct_ToonPhysical}
           `)
+     
       fragment = fragment.replace("#include <lights_fragment_begin>", `
           ${lights_fragment_beginToon}
           `)
+     
       fragment = fragment.replace("#include <fog_fragment>", `
           ${ACES_fog_fragment}
           `)
@@ -86,7 +88,9 @@ export class ToonMaterials {
 
     originMaterial.onBeforeCompile = function (shader: any) {
       let fragment = shader.fragmentShader
+
       fragment = fragment.replace("#include <lights_physical_pars_fragment>", `
+
           #include <lights_physical_pars_fragment>
           //vec3 fresnelCol = vec3(254., 103., 57.)/255.;
           vec3 fresnelCol = vec3(0.)/255.;
@@ -94,6 +98,7 @@ export class ToonMaterials {
           ${patch}
           ${RE_Direct_ToonPhysical_Road}
           `)
+
       fragment = fragment.replace("#include <lights_fragment_begin>", `
           ${lights_fragment_beginToon}
           `)

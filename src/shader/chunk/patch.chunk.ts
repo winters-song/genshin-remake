@@ -1,4 +1,5 @@
 export const patch = /*glsl*/`
+
 struct GeometricContext {
   vec3 position;
   vec3 normal;
@@ -20,4 +21,5 @@ vec3 BRDF_GGX( const in vec3 lightDir, const in vec3 viewDir, const in vec3 norm
   return F * ( V * D );
 }
 uniform vec3 lightProbe[ 9 ];
+
 `

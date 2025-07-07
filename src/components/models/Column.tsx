@@ -56,6 +56,8 @@ function MeshInstances({ mesh, transforms }: { mesh: THREE.Mesh, transforms: Mes
       material={toonMaterial}
       limit={1000}
       range={transforms.length}
+      castShadow={true}
+      receiveShadow={true}
     >
       {transforms.map((t: MeshTransform, idx: number) => (
         <Instance key={idx} position={t.position} rotation={t.rotation} scale={t.scale} />
@@ -76,7 +78,6 @@ export const Column = () => {
     const result: THREE.Mesh[] = [];
     gltf.scene?.traverse((child: THREE.Object3D) => {
       if ((child as THREE.Mesh).isMesh) {
-        child.receiveShadow = true
         result.push(child as THREE.Mesh);
       }
     });
@@ -84,6 +85,7 @@ export const Column = () => {
   });
   return (
     <>
+    
       {models.map((model, modelIdx) => (
         meshesByModel[modelIdx].map((mesh, meshIdx) => (
           <MeshInstances
