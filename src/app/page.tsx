@@ -61,10 +61,10 @@ export default function Home() {
         //   camera.rotation.set(5.5 * Math.PI / 180, 0, 0)
         // }}
         // frameloop="demand"
-        // shadows={{
-        //   enabled: true,
-        //   type: THREE.PCFSoftShadowMap,
-        // }}
+        shadows={{
+          enabled: true,
+          type: THREE.PCFShadowMap,
+        }}
       >
         <Stats />
 
