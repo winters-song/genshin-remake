@@ -2,6 +2,10 @@ import * as THREE from 'three'
 import { frag as bigCloud } from '../../shader/fragment/BigCloud.frag'
 import { frag as bigCloudBG } from '../../shader/fragment/BigCloudBG.frag'
 import { vert as simpleVert } from '../../shader/vertex/simple.vert'
+import { frag as cloudFrag } from '../../shader/fragment/cloud.frag'
+import { vert as cloudVert } from '../../shader/vertex/cloud.vert'
+import { frag as polarLightFrag } from '../../shader/fragment/polarLight.frag'
+import { frag as hashFogFrag } from '../../shader/fragment/hashFog.frag'
 import { useMemo } from 'react'
 import { useLoader } from '@react-three/fiber'
 import { RE_Direct_ToonPhysical } from '@/shader/chunk/RE_Direct_ToonPhysical.chunk'
@@ -9,6 +13,30 @@ import { default as lights_fragment_beginToon } from '@/shader/chunk/lights_frag
 import { ACES_fog_fragment } from '@/shader/chunk/ACES_fog_fragment.chunk'
 import { RE_Direct_ToonPhysical_Road } from '@/shader/chunk/RE_Direct_ToonPhysical.chunk_Road'
 import { patch } from '@/shader/chunk/patch.chunk'
+import { TextureLoader } from 'three'
+
+export function useCloudMaterial() {
+  return useMemo(() => {
+
+    const textureLoader = new TextureLoader();
+    const texture_Cloud = textureLoader.load("Genshin/Login/Textures/Tex_0062.png");
+    const M_Cloud = new THREE.ShaderMaterial({
+      uniforms: {
+        cloudTexture: { value: texture_Cloud },
+        color_1: { value: new THREE.Color("#00a2f0") },
+        color_intensity_1: { value: 1 },
+        color_2: { value: new THREE.Color("#f0f0f5") },
+        color_intensity_2: { value: 1 },
+      },
+      fragmentShader: cloudFrag,
+      vertexShader: cloudVert,
+      transparent: true,
+      depthWrite: false,
+
+    });
+    return M_Cloud;
+  }, [])
+}
 
 export function useBigCloudMaterial() {
   const texture = useLoader(THREE.TextureLoader, '/Genshin/Login/Textures/Tex_0063.png')
@@ -46,11 +74,46 @@ export function useBigCloudBGMaterial() {
   }, [isTextureLoaded, texture])
 }
 
+export function usePolarLightMaterial() {
+  return useMemo(() => {
+
+    const textureLoader = new TextureLoader();
+    const texture_Light = textureLoader.load("Genshin/Login/Textures/Tex_0071.png");
+    texture_Light.wrapS = THREE.RepeatWrapping
+    texture_Light.wrapT = THREE.RepeatWrapping
+    const M_PolarLight = new THREE.ShaderMaterial({
+      uniforms: {
+        lightTexture: { value: texture_Light },
+        time: { value: 123 }
+      },
+      fragmentShader: polarLightFrag,
+      vertexShader: simpleVert,
+      transparent: true,
+      depthWrite: false,
+
+    });
+    return M_PolarLight;
+  }, [])
+}
+
+export function useHashFogMaterial() {
+  return useMemo(() => {
+    return new THREE.ShaderMaterial({
+      uniforms: { time: { value: 123 } },
+      fragmentShader: hashFogFrag,
+      vertexShader: simpleVert,
+      transparent: true,
+      depthWrite: false,
+    })
+  }, [])
+}
+
 /**
  * https://github.com/mrdoob/three.js/blob/181e04eea8b569dc09048f9dc644310ed6b745a6/src/renderers/shaders/ShaderChunk/lights_fragment_begin.glsl.js#L145
  */
 export class ToonMaterials {
   public getToonMaterial_Column(originMaterial: any) {
+
     originMaterial.metalness = 0.3;
     originMaterial.side = THREE.FrontSide;
     originMaterial.onBeforeCompile = function (shader: any) {
@@ -64,19 +127,20 @@ export class ToonMaterials {
           ${patch}
           ${RE_Direct_ToonPhysical}
           `)
-     
+
       fragment = fragment.replace("#include <lights_fragment_begin>", `
           ${lights_fragment_beginToon}
           `)
-     
-      fragment = fragment.replace("#include <fog_fragment>", `
-          ${ACES_fog_fragment}
-          `)
+
+      // fragment = fragment.replace("#include <fog_fragment>", `
+      //     ${ACES_fog_fragment}
+      //     `)
       shader.fragmentShader = fragment;
     }
     return originMaterial;
   }
   public getToonMaterial_Road(originMaterial: any, renderer: THREE.WebGLRenderer) {
+
     originMaterial.color.multiply(new THREE.Color("#fffcfe").add(new THREE.Color().setRGB(0.015, 0, 0)))
     originMaterial.normalMap.minFilter = THREE.LinearMipmapLinearFilter;
     originMaterial.normalMap.anisotropy = renderer.capabilities.getMaxAnisotropy() / 2;

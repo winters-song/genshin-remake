@@ -2,7 +2,7 @@
 
 import { Canvas } from '@react-three/fiber'
 import { useRef, useEffect, useState, Suspense } from 'react'
-import { OrbitControls, Stats, useGLTF } from "@react-three/drei"
+import { Stats, useGLTF } from "@react-three/drei"
 import { Preloader } from '@/components/Preloader/Preloader'
 import { Menu } from '@/components/Menu/Menu'
 import { Models } from '@/components/data/ModelList'
@@ -16,7 +16,6 @@ export default function Home() {
   const [userReady, setUserReady] = useState(false)
   const [audioStarted, setAudioStarted] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
-  const forwardCameraRef = useRef<any>(null)
 
   // Function to handle canvas click and play audio
   const handleCanvasClick = () => {
@@ -57,26 +56,26 @@ export default function Home() {
         }}
         gl={{ antialias: true }}
         onClick={handleCanvasClick}
-        // onCreated={({ camera }) => {
-        //   camera.rotation.set(5.5 * Math.PI / 180, 0, 0)
-        // }}
+        onCreated={({ gl }) => {
+          gl.toneMapping = THREE.ACESFilmicToneMapping
+        }}
         // frameloop="demand"
         shadows={{
           enabled: true,
-          type: THREE.PCFShadowMap,
+          type: THREE.PCFSoftShadowMap,
         }}
       >
         <Stats />
 
-        <ForwardCamera ref={forwardCameraRef} />
+        <ForwardCamera />
         <Suspense fallback={null}>
-          <Scene forwardCameraRef={forwardCameraRef} />
+          <Scene />
         </Suspense>
       </Canvas>
     </>
   )
 }
 
-// useGLTF.preload(Models.map((model) => model.url));
+useGLTF.preload(Models.map((model) => model.url));
 
 

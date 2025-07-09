@@ -1,25 +1,13 @@
-import { useMemo } from 'react';
 import { useGLTF, Instance, Instances } from "@react-three/drei";
 import { MeshList, ObjectList } from '@/components/data/ColumnList';
 import { getModelsByTitles } from '@/components/data/ModelList';
 import { toonMaterials } from '@/components/models/Materials';
 import * as THREE from 'three';
+import { MeshListItem, MeshTransformsByObject, MeshTransform } from '@/types/types';
+import React, { useMemo } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
+import { zLength } from "../data/Config";
 
-// Types from GameScene
-export type MeshTransform = {
-  position: [number, number, number];
-  rotation: [number, number, number];
-  scale: [number, number, number];
-};
-export type MeshListItem = {
-  Object: string;
-  Location: number[];
-  Rotation: number[];
-  Scale: number[];
-};
-export type MeshTransformsByObject = {
-  [objectName: string]: MeshTransform[];
-};
 
 // Helper: preprocess mesh transforms for each object type
 const preprocessMeshListByObject = (meshList: MeshListItem[]): MeshTransformsByObject => {
@@ -47,9 +35,29 @@ const preprocessMeshListByObject = (meshList: MeshListItem[]): MeshTransformsByO
   return grouped;
 };
 
+
 function MeshInstances({ mesh, transforms }: { mesh: THREE.Mesh, transforms: MeshTransform[] }) {
   if (!mesh.geometry || !mesh.material) return null;
   const toonMaterial = toonMaterials.getToonMaterial_Column(mesh.material);
+  const { camera } = useThree();
+  const instanceRefs = React.useRef<(THREE.Object3D | null)[]>([]);
+
+  useFrame(() => {
+    for (let i = 0; i < transforms.length; i++) {
+      const ref = instanceRefs.current[i];
+      if (ref) {
+        // Get current position
+        const pos = transforms[i].position;
+        // If behind camera, move forward
+        if (pos[2] - camera.position.z > 2000) {
+          pos[2] -= zLength;
+        }
+        // Update instance position directly
+        ref.position.set(pos[0], pos[1], pos[2]);
+      }
+    }
+  });
+
   return (
     <Instances
       geometry={mesh.geometry}
@@ -60,7 +68,13 @@ function MeshInstances({ mesh, transforms }: { mesh: THREE.Mesh, transforms: Mes
       receiveShadow={true}
     >
       {transforms.map((t: MeshTransform, idx: number) => (
-        <Instance key={idx} position={t.position} rotation={t.rotation} scale={t.scale} />
+        <Instance
+          key={idx}
+          ref={el => { instanceRefs.current[idx] = el as THREE.Object3D; }}
+          position={t.position}
+          rotation={t.rotation}
+          scale={t.scale}
+        />
       ))}
     </Instances>
   );
@@ -85,7 +99,6 @@ export const Column = () => {
   });
   return (
     <>
-    
       {models.map((model, modelIdx) => (
         meshesByModel[modelIdx].map((mesh, meshIdx) => (
           <MeshInstances

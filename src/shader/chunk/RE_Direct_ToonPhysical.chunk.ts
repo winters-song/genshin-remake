@@ -1,7 +1,5 @@
-import { ACES_Inv } from "./ACES.chunk";
 
 export const RE_Direct_ToonPhysical=/*glsl*/`
-${ACES_Inv}
 void RE_Direct_ToonPhysical( const in IncidentLight directLight, const in vec3 geometryPosition, const in vec3 geometryNormal, const in vec3 geometryViewDir, const in vec3 geometryClearcoatNormal, const in PhysicalMaterial material, const in float metalnessFactor, inout ReflectedLight reflectedLight ) {
     float dotNL_noSaturate = dot( geometryNormal, directLight.direction );
     float dotNL = saturate( dotNL_noSaturate );

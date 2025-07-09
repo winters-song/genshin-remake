@@ -13,32 +13,34 @@ interface RoadProps {
 const zLength = 212.4027;
 const offset = new Vector3(0, 34, 0);
 
-export function Road({ extendNum = 1 }: RoadProps) {
+const Road = ({ extendNum = 1 }: RoadProps) => {
   const group = useRef<Group>(null);
   const { gl, camera } = useThree(); // 获取 renderer 和 camera
   const { scene } = useGLTF(getModelByTitle("Road") || "");
   const [shouldStop, setShouldStop] = useState(false)
+  const [roadUnits, setRoadUnits] = useState<Mesh[]>([]);
 
   // Only run traverse once
   useEffect(() => {
-    scene.traverse((mesh: any) => {
-      mesh.receiveShadow = true
-      if (mesh instanceof Mesh) {
-        mesh.material = toonMaterials.getToonMaterial_Road(mesh.material, gl)
+    if(scene && gl){
+      scene.traverse((mesh: any) => {
         mesh.receiveShadow = true
-        
-      }
-    })
+        if (mesh instanceof Mesh) {
+          mesh.material = toonMaterials.getToonMaterial_Road(mesh.material, gl)
+          mesh.receiveShadow = true
+        }
+      })
+
+      const base = scene.clone(true) as Group;
+      base.children.forEach((child) => {
+        child.scale.multiplyScalar(0.1);
+        child.position.multiplyScalar(0.1);
+        child.position.y = -34
+      });
+      setRoadUnits(base.children as Mesh[]);
+    }
   }, [scene, gl]);
 
-  const roadUnits = useMemo(() => {
-    const base = scene.clone(true) as Group;
-    base.children.forEach((child) => {
-      child.scale.multiplyScalar(0.1);
-      child.position.multiplyScalar(0.1);
-    });
-    return base.children;
-  }, [scene]);
 
   // Store refs to all road meshes and their positions
   const roadRefs = useRef<Array<Mesh | null>>([]);
@@ -53,6 +55,7 @@ export function Road({ extendNum = 1 }: RoadProps) {
     for (let i = 0; i < extendNum + 1; i++) {
       for (let j = 0; j < n; j++) {
         const child = roadUnits[j].clone() as Mesh;
+        child.receiveShadow = true
         child.position.add(new Vector3(0, 0, -zLength * i));
         // Store original position
         originPositions.current.push(child.position.clone());
@@ -69,7 +72,7 @@ export function Road({ extendNum = 1 }: RoadProps) {
       }
     }
     return roads;
-  }, []);
+  }, [roadUnits]);
 
   // Animate the road moving towards the camera
   useFrame(() => {
@@ -86,7 +89,7 @@ export function Road({ extendNum = 1 }: RoadProps) {
         mesh.position.y = originalY - 70; // Start below
         gsap.to(mesh.position, {
           y: originalY,
-          duration: 0.5,
+          duration: 2,
           ease: "back.out(1.7)",
         });
       }
@@ -94,14 +97,10 @@ export function Road({ extendNum = 1 }: RoadProps) {
   });
 
   return (
-    <>
-    {/* <mesh position={[0, 0, -100]} castShadow receiveShadow>
-       <sphereGeometry args={[20, 32, 32]} />
-       <meshStandardMaterial color="blue" />
-     </mesh> */}
-    <group ref={group} position={[-offset.x, -offset.y, -offset.z]}>
+    <group ref={group} position={[-offset.x, -offset.y, -offset.z]} >
       {allRoads}
     </group>
-    </>
   );
 }
+
+export default Road;

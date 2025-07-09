@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import * as THREE from 'three'
 import { useBigCloudMaterial, useBigCloudBGMaterial } from './Materials'
 
-export const BigCloud = () => {
+const BigCloud = () => {
   const { scene } = useGLTF(getModelByTitle('BigCloud') || '')
 
   const M_BigCloud = useBigCloudMaterial()
@@ -35,3 +35,5 @@ export const BigCloud = () => {
     <primitive object={scene} position={[0,0,0]} />
   )
 }
+
+export default BigCloud;
