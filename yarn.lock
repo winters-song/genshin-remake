@@ -3017,11 +3017,6 @@ postprocessing@^6.36.6:
   resolved "https://registry.npmmirror.com/postprocessing/-/postprocessing-6.37.6.tgz"
   integrity sha512-KrdKLf1257RkoIk3z3nhRS0aToKrX2xJgtR0lbnOQUjd+1I4GVNv1gQYsQlfRglvEXjpzrwqOA5fXfoDBimadg==
 
-postprocessing@^6.37.6:
-  version "6.37.6"
-  resolved "https://registry.npmmirror.com/postprocessing/-/postprocessing-6.37.6.tgz#5b0766faeab86a73e6f3750f25a3e6ecd522928a"
-  integrity sha512-KrdKLf1257RkoIk3z3nhRS0aToKrX2xJgtR0lbnOQUjd+1I4GVNv1gQYsQlfRglvEXjpzrwqOA5fXfoDBimadg==
-
 potpack@^1.0.1:
   version "1.0.2"
   resolved "https://registry.npmmirror.com/potpack/-/potpack-1.0.2.tgz"
@@ -3059,7 +3054,7 @@ queue-microtask@^1.2.2:
   resolved "https://registry.npmmirror.com/queue-microtask/-/queue-microtask-1.2.3.tgz"
   integrity sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==
 
-react-colorful@^5.5.1, react-colorful@^5.6.1:
+react-colorful@^5.5.1:
   version "5.6.1"
   resolved "https://registry.npmmirror.com/react-colorful/-/react-colorful-5.6.1.tgz"
   integrity sha512-1exovf0uGTGyq5mXQT0zgQ80uvj2PCwvF8zY1RN9/vbJVSjSo3fsB/4L3ObbF7u70NduSiK4xu4Y6q1MHoUGEw==
