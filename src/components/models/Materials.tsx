@@ -140,8 +140,6 @@ export class ToonMaterials {
     return originMaterial;
   }
   public getToonMaterial_Road(originMaterial: any, renderer: THREE.WebGLRenderer) {
-
-    originMaterial.color.multiply(new THREE.Color("#fffcfe").add(new THREE.Color().setRGB(0.015, 0, 0)))
     originMaterial.normalMap.minFilter = THREE.LinearMipmapLinearFilter;
     originMaterial.normalMap.anisotropy = renderer.capabilities.getMaxAnisotropy() / 2;
     originMaterial.roughnessMap.anisotropy = renderer.capabilities.getMaxAnisotropy() / 2;
@@ -172,24 +170,28 @@ export class ToonMaterials {
     originMaterial.needsUpdate = true
     return originMaterial;
   }
-  // public getToonMaterial_Door(originMaterial: MeshPhysicalMaterial, renderer: WebGLRenderer) {
-  //     originMaterial.metalness = 0.15;
-  //     originMaterial.color = new Color("#454545")
-  //     originMaterial.onBeforeCompile = function (shader) {
-  //         let fragment = shader.fragmentShader
-  //         fragment = fragment.replace("#include <lights_physical_pars_fragment>", `
-  //         #include <lights_physical_pars_fragment>
-  //         vec3 fresnelCol = vec3(254., 103., 57.)/255.;
-  //         ${RE_Direct_ToonPhysical_Road}
-  //         `)
-  //         fragment = fragment.replace("#include <lights_fragment_begin>", `
-  //         ${lights_fragment_beginToon}
-  //         `)
 
-  //         shader.fragmentShader = fragment;
-  //     }
-  //     originMaterial.needsUpdate = true
-  //     return originMaterial;
-  // }
+  public getToonMaterial_Door(originMaterial: any) {
+    originMaterial.metalness = 0.15;
+    originMaterial.color = new THREE.Color("#888888")
+    originMaterial.side = THREE.FrontSide;
+    originMaterial.onBeforeCompile = function (shader: any) {
+      let fragment = shader.fragmentShader
+      fragment = fragment.replace("#include <lights_physical_pars_fragment>", `
+          #include <lights_physical_pars_fragment>
+          vec3 fresnelCol = vec3(254., 103., 57.)/255.;
+
+          ${patch}
+          ${RE_Direct_ToonPhysical_Road}
+          `)
+      fragment = fragment.replace("#include <lights_fragment_begin>", `
+          ${lights_fragment_beginToon}
+          `)
+
+      shader.fragmentShader = fragment;
+    }
+    originMaterial.needsUpdate = true
+    return originMaterial;
+  }
 }
 export const toonMaterials = new ToonMaterials();

@@ -5,19 +5,22 @@ import { Mesh, Vector3, Group } from "three";
 import { getModelByTitle } from "../data/ModelList";
 import { toonMaterials } from "./Materials";
 import gsap from "gsap";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, setDoorPosition, setShouldStop } from "@/store/gameStore";
 
 interface RoadProps {
   extendNum?: number;
 }
 
 const zLength = 212.4027;
-const offset = new Vector3(0, 34, 0);
+const offset = new Vector3(0, -34, 0);
 
 const Road = ({ extendNum = 1 }: RoadProps) => {
+  const dispatch = useDispatch()
   const group = useRef<Group>(null);
   const { gl, camera } = useThree(); // 获取 renderer 和 camera
   const { scene } = useGLTF(getModelByTitle("Road") || "");
-  const [shouldStop, setShouldStop] = useState(false)
+  const {shouldStop, gameStarted} = useSelector((state: RootState) => state.game)
   const [roadUnits, setRoadUnits] = useState<Mesh[]>([]);
 
   // Only run traverse once
@@ -35,7 +38,7 @@ const Road = ({ extendNum = 1 }: RoadProps) => {
       base.children.forEach((child) => {
         child.scale.multiplyScalar(0.1);
         child.position.multiplyScalar(0.1);
-        child.position.y = -34
+        // child.position.y = -34
       });
       setRoadUnits(base.children as Mesh[]);
     }
@@ -83,6 +86,10 @@ const Road = ({ extendNum = 1 }: RoadProps) => {
       if (!mesh) continue;
       // If passed camera, wrap to back
       if (mesh.position.z > cameraZ) {
+        if (i == 0 && gameStarted) {
+          dispatch(setDoorPosition([0, offset.y, mesh.position.z - (extendNum + 1) * zLength - 14]))
+          dispatch(setShouldStop(true))
+        }
         mesh.position.z -= (zLength * (extendNum + 1));
         // Animate Y position: drop down, then bounce back up
         const originalY = originPositions.current[i].y;
@@ -97,7 +104,7 @@ const Road = ({ extendNum = 1 }: RoadProps) => {
   });
 
   return (
-    <group ref={group} position={[-offset.x, -offset.y, -offset.z]} >
+    <group ref={group} position={[offset.x, offset.y, offset.z]} >
       {allRoads}
     </group>
   );

@@ -1,47 +1,37 @@
-import { useEffect, useRef, useState } from "react"
-// import { gameManager } from "../core/GameManager";
-
-// Simple audioEffect utility for playing sound effects
-const audioEffect = {
-  _audio: null as HTMLAudioElement | null,
-  play({ url, force }: { url: string; force?: boolean }) {
-    if (!this._audio) {
-      this._audio = new window.Audio(url);
-    } else {
-      if (force) {
-        this._audio.pause();
-        this._audio.currentTime = 0;
-        this._audio.src = url;
-      }
-    }
-    this._audio.play();
-  },
-};
-// TODO: Move audioEffect to a shared utility file if used elsewhere
+import { RootState, setGameStarted } from "@/store/gameStore";
+import { useEffect, useState } from "react"
+import { useDispatch, useSelector } from "react-redux";
+import audioEffect from "@/components/AudioEffect";
 
 export function Menu() {
+  const dispatch = useDispatch()
   const [login, setLogin] = useState(false);
   const [menu12, setMenu12] = useState(false);
-  const [doorCreate, setDoorCreate] = useState(false);
-  const [openDoor, setOpenDoor] = useState(false);
+  const doorCreated = useSelector((state: RootState) => state.game.doorCreated);
+  const shouldOpenDoor = useSelector((state: RootState) => state.game.shouldOpenDoor);
 
   const onStartClick = () => {
     audioEffect.play({ url: "/Genshin/Genshin Impact [Duang].mp3", force: true });
-    // gameManager.emit("start")
+    dispatch(setGameStarted(true))
     setLogin(false)
   }
 
   useEffect(() => {
-    // gameManager.on("doorCreate", () => {
-    //   setDoorCreate(true)
-    // }, true, true);
-    // gameManager.on("openDoor", () => {
-    //   setOpenDoor(true)
-    //   setMenu12(false)
-    // }, true, true);
     setTimeout(() => {
       setLogin(true);
       setMenu12(true)
+      
+      const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key === 'Enter') {
+          onStartClick();
+        }
+      };
+      
+      window.addEventListener('keydown', handleKeyDown);
+      
+      return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+      };
     }, 500);
   }, [])
 
@@ -93,8 +83,9 @@ export function Menu() {
             backgroundSize: "100% 100%",
             backgroundColor: "#00000000",
             cursor: 'url("/Genshin/T_Mouse.png"), default',
-            transition: "all 0.2s"
+            transition: "all 0.2s",
           }}
+          title="开门"
           onClick={login ? onStartClick : () => { }}
         ></button>
         <button
@@ -112,15 +103,23 @@ export function Menu() {
             cursor: 'url("/Genshin/T_Mouse.png"), default',
             transition: "all 0.2s"
           }}
+          title="全屏"
           onClick={login ? () => {
-            window.open('https://www.bilibili.com/video/BV1E8411v7xy');
+            // Make browser fullscreen
+            if (document.documentElement.requestFullscreen) {
+              document.documentElement.requestFullscreen();
+            } else if ((document.documentElement as any).webkitRequestFullscreen) {
+              (document.documentElement as any).webkitRequestFullscreen();
+            } else if ((document.documentElement as any).msRequestFullscreen) {
+              (document.documentElement as any).msRequestFullscreen();
+            }
           } : () => { }}
         ></button>
       </div>
-      {doorCreate && (
+      {doorCreated && (
         <div
           className="absolute flex flex-col-reverse transition-opacity duration-500 h-full w-full"
-          style={{ opacity: openDoor ? "0" : "1" }}
+          style={{ opacity: shouldOpenDoor ? "0" : "1" }}
         >
           <div
             className="absolute flex justify-center items-center"

@@ -15,7 +15,7 @@ void main() {
     vec4 col = texture(cloudTexture,vUv);
     vec3 mask = col.rgb;
 
-    vec3 col_r = mix(color_1*color_intensity_1,color_2*color_intensity_2,vec3(pow(mask.r,0.6)));
+    vec3 col_r = mix(color_1*color_intensity_1,color_2 * color_intensity_2,vec3(pow(mask.r,0.6)));
 
     col = vec4(col_r,col.a);
 
